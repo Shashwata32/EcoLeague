@@ -1,0 +1,90 @@
+/* --- Global Resets & Typography --- */
+body { 
+    font-family: 'Inter', sans-serif; 
+    -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
+}
+
+.font-fredoka { 
+    font-family: 'Fredoka', sans-serif; 
+}
+
+/* --- Utility Animations --- */
+
+/* Fade In Up: Used for page transitions */
+.animate-fade-in { 
+    animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
+}
+
+@keyframes fadeInUp {
+    from { 
+        opacity: 0; 
+        transform: translateY(15px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+/* Float: Used for the leaf icon on login */
+.animate-float {
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(5deg); }
+    100% { transform: translateY(0px) rotate(0deg); }
+}
+
+/* Pulse: Used for status indicators */
+.animate-pulse-slow {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* --- Component Specific Styles --- */
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { 
+    width: 6px; 
+    height: 6px; 
+}
+::-webkit-scrollbar-track { 
+    background: transparent; 
+}
+::-webkit-scrollbar-thumb { 
+    background: #e2e8f0; 
+    border-radius: 10px; 
+}
+::-webkit-scrollbar-thumb:hover { 
+    background: #cbd5e1; 
+}
+
+/* Horizontal Snap Scroll for Wall of Fame */
+.snap-x { 
+    scroll-snap-type: x mandatory; 
+    -webkit-overflow-scrolling: touch;
+}
+.snap-start { 
+    scroll-snap-align: start; 
+}
+
+/* Safe area padding for newer iPhones */
+.pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+}
+
+/* --- Interactive Elements --- */
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* Glassmorphism utility */
+.glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
