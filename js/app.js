@@ -665,8 +665,13 @@ window.submitReport = async () => {
         // If it fails, give a clear reason
         alert("Upload failed. " + e.message); 
     } finally { 
-        btn.innerHTML = `Submit <i class="fas fa-paper-plane"></i>`; 
-        btn.disabled = false; 
+        // btn.innerHTML = `Submit <i class="fas fa-paper-plane"></i>`; 
+        // btn.disabled = false; 
+
+        if(document.getElementById('btn-submit')) {
+            btn.innerHTML = `Submit <i class="fas fa-paper-plane"></i>`; 
+            btn.disabled = false; 
+        }
     }
 };
 
