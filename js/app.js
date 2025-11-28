@@ -655,10 +655,10 @@ window.submitReport = async () => {
         window.switchView('home');
 
         // Clear form
-        document.getElementById('input-desc').value = '';
-        document.getElementById('file-input').value = '';
-        document.getElementById('preview-container').classList.add('hidden');
-        document.getElementById('upload-placeholder').classList.remove('hidden');
+        // document.getElementById('input-desc').value = '';
+        // document.getElementById('file-input').value = '';
+        // document.getElementById('preview-container').classList.add('hidden');
+        // document.getElementById('upload-placeholder').classList.remove('hidden');
 
     } catch (e) { 
         console.error("Error:", e);
@@ -708,114 +708,5 @@ async function processImage(file) {
         throw new Error("Could not compress image. Try a smaller one.");
     }
 }
-
-// window.submitReport = async () => {
-//     const btn = document.getElementById('btn-submit');
-//     const areaId = document.getElementById('input-area').value;
-//     const desc = document.getElementById('input-desc').value;
-//     const fileInput = document.getElementById('file-input');
-    
-//     if (!areaId || !desc) return alert("Please fill in all fields.");
-//     if (!fileInput.files[0]) return alert("Please select a photo.");
-
-//     btn.innerHTML = `<i class="fas fa-cog fa-spin"></i> Compressing...`; 
-//     btn.disabled = true;
-
-//     try {
-//         // 1. SMART COMPRESSION
-//         // This handles HEIC vs JPEG and guarantees the result is under 1MB
-//         const finalImageBase64 = await compressImage(fileInput.files[0]);
-
-//         btn.innerHTML = `<i class="fas fa-cloud-upload-alt"></i> Uploading...`;
-
-//         // 2. Upload to Firestore
-//         await addDoc(collection(db, 'artifacts', APP_COLLECTION_ID, 'public', 'data', 'submissions'), { 
-//             areaId, 
-//             userId: state.currentUser.uid, 
-//             description: desc, 
-//             image: finalImageBase64, 
-//             status: 'pending', 
-//             hallOfFame: false, 
-//             timestamp: serverTimestamp() 
-//         });
-
-//         alert("Submitted Successfully!"); 
-//         window.switchView('home');
-
-//     } catch (e) { 
-//         console.error("Submission Error:", e);
-//         alert("Upload failed. Try a different photo."); 
-//     } finally { 
-//         btn.innerHTML = `Submit`; 
-//         btn.disabled = false; 
-//     }
-// };
-
-// async function compressImage(file) {
-//     // A. Handle HEIC Files (iPhone)
-//     if (file.type === "image/heic" || file.name.toLowerCase().endsWith('.heic')) {
-//         try {
-//             console.log("HEIC detected. Converting to JPEG...");
-//             // Convert to JPEG Blob
-//             const convertedBlob = await heic2any({
-//                 blob: file,
-//                 toType: "image/jpeg",
-//                 quality: 0.8
-//             });
-//             file = convertedBlob; // Swap original file with new JPEG
-//         } catch (e) {
-//             console.warn("HEIC conversion failed or not needed:", e);
-//         }
-//     }
-
-//     // B. Resize & Compress Loop
-//     return new Promise((resolve, reject) => {
-//         const reader = new FileReader();
-//         reader.readAsDataURL(file);
-        
-//         reader.onload = (event) => {
-//             const img = new Image();
-//             img.src = event.target.result;
-            
-//             img.onload = () => {
-//                 const canvas = document.createElement('canvas');
-//                 let width = img.width;
-//                 let height = img.height;
-
-//                 // 1. Initial Resize (Max Width 1000px)
-//                 // This usually cuts size by 80% immediately
-//                 const MAX_WIDTH = 1000;
-//                 if (width > MAX_WIDTH) {
-//                     height *= MAX_WIDTH / width;
-//                     width = MAX_WIDTH;
-//                 }
-
-//                 canvas.width = width;
-//                 canvas.height = height;
-
-//                 const ctx = canvas.getContext('2d');
-//                 ctx.drawImage(img, 0, 0, width, height);
-
-//                 // 2. Quality Reduction Loop
-//                 // Start at 0.7 (70%) quality
-//                 let quality = 0.7;
-//                 let dataUrl = canvas.toDataURL('image/jpeg', quality);
-
-//                 // While file size is > 900KB (approx 900,000 chars in Base64), reduce quality
-//                 // We use 900KB to be safe because Firestore limit is strictly 1,048,576 bytes including other fields
-//                 while (dataUrl.length > 900000 && quality > 0.1) {
-//                     console.log(`Image still too big (${Math.round(dataUrl.length/1024)}KB). Compressing more...`);
-//                     quality -= 0.1;
-//                     dataUrl = canvas.toDataURL('image/jpeg', quality);
-//                 }
-
-//                 console.log(`Final Size: ${Math.round(dataUrl.length/1024)}KB`);
-//                 resolve(dataUrl);
-//             };
-//             img.onerror = (err) => reject(err);
-//         };
-//         reader.onerror = (err) => reject(err);
-//     });
-// }
 
 init();
