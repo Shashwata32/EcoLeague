@@ -397,11 +397,27 @@ function updateAdminDashboardData() {
                     <div class="flex justify-between items-center mb-2"><span class="bg-green-100 text-green-800 text-[10px] font-bold px-2 py-1 rounded uppercase">${state.areas.find(a => a.id === sub.areaId)?.name || 'Unknown'}</span></div>
                     ${sub.image ? `<img src="${sub.image}" class="w-full h-40 object-cover rounded-xl mb-3 bg-gray-50 shadow-sm cursor-zoom-in" onclick="window.zoomImage('${sub.image}')" />` : ''}
                     <p class="text-gray-800 text-sm font-medium mb-3">"${sub.description}"</p>
-                    <div class="flex gap-2">
-                        <button onclick="window.gradeSubmission('${sub.id}', '${sub.areaId}', 5)" class="flex-1 bg-white border border-gray-200 text-green-600 py-2 rounded-lg text-xs font-bold">Accept (+5)</button>
-                        <button onclick="window.gradeSubmission('${sub.id}', '${sub.areaId}', 10, true)" class="flex-1 bg-green-600 text-white py-2 rounded-lg text-xs font-bold">Fame (+10)</button>
-                        <button onclick="window.rejectSubmission('${sub.id}')" class="px-3 text-red-400 hover:bg-red-50 rounded-lg"><i class="fas fa-times"></i></button>
-                    </div>
+                    
+
+
+                    <div class="flex gap-2 items-center mt-3">
+    <div class="relative w-16">
+        <input type="number" id="score-${sub.id}" value="5" min="1" max="10" 
+            class="w-full p-2 text-center font-bold text-gray-800 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-green-500">
+    </div>
+    
+    <button onclick="window.gradeSubmission('${sub.id}', '${sub.areaId}')" 
+        class="flex-1 bg-green-600 text-white py-2 rounded-lg text-xs font-bold hover:bg-green-700 transition shadow-sm">
+        Approve
+    </button>
+    
+    <button onclick="window.rejectSubmission('${sub.id}')" 
+        class="px-3 py-2 text-red-400 hover:bg-red-50 rounded-lg border border-transparent hover:border-red-100 transition">
+        <i class="fas fa-times"></i>
+    </button>
+</div>
+
+
                 </div>
             `).join('');
         }
@@ -409,6 +425,11 @@ function updateAdminDashboardData() {
     updateCharts();
 }
 
+/* <div class="flex gap-2">
+                        <button onclick="window.gradeSubmission('${sub.id}', '${sub.areaId}', 5)" class="flex-1 bg-white border border-gray-200 text-green-600 py-2 rounded-lg text-xs font-bold">Accept (+5)</button>
+                        <button onclick="window.gradeSubmission('${sub.id}', '${sub.areaId}', 10, true)" class="flex-1 bg-green-600 text-white py-2 rounded-lg text-xs font-bold">Fame (+10)</button>
+                        <button onclick="window.rejectSubmission('${sub.id}')" class="px-3 text-red-400 hover:bg-red-50 rounded-lg"><i class="fas fa-times"></i></button>
+                    </div> */
 function initCharts() {
     const ctx1 = document.getElementById('participationChart');
     const ctx2 = document.getElementById('scoreChart');
@@ -540,11 +561,46 @@ window.announceWinners = async () => {
     }
 };
 
-window.gradeSubmission = async (subId, areaId, points, fame = false) => {
+// window.gradeSubmission = async (subId, areaId, points, fame = false) => {
+//     try { 
+//         await updateDoc(doc(db, 'artifacts', APP_COLLECTION_ID, 'public', 'data', 'areas', areaId), { score: increment(Number(points)) }); 
+//         await updateDoc(doc(db, 'artifacts', APP_COLLECTION_ID, 'public', 'data', 'submissions', subId), { status: 'approved', pointsAwarded: points, hallOfFame: fame }); 
+//     } catch (e) { console.error(e); }
+// };
+
+window.gradeSubmission = async (subId, areaId) => {
+    // 1. Get the value from the specific input field for this submission
+    const inputEl = document.getElementById(`score-${subId}`);
+    if (!inputEl) return;
+
+    const points = parseInt(inputEl.value);
+
+    // 2. Validation
+    if (isNaN(points) || points < 1 || points > 10) {
+        alert("Please enter a score between 1 and 10.");
+        return;
+    }
+
+    // 3. Determine Fame Status (Score > 8)
+    const isFame = points > 8;
+
     try { 
-        await updateDoc(doc(db, 'artifacts', APP_COLLECTION_ID, 'public', 'data', 'areas', areaId), { score: increment(Number(points)) }); 
-        await updateDoc(doc(db, 'artifacts', APP_COLLECTION_ID, 'public', 'data', 'submissions', subId), { status: 'approved', pointsAwarded: points, hallOfFame: fame }); 
-    } catch (e) { console.error(e); }
+        // Update Area Score
+        await updateDoc(doc(db, 'artifacts', APP_COLLECTION_ID, 'public', 'data', 'areas', areaId), { 
+            score: increment(points) 
+        }); 
+        
+        // Update Submission Status
+        await updateDoc(doc(db, 'artifacts', APP_COLLECTION_ID, 'public', 'data', 'submissions', subId), { 
+            status: 'approved', 
+            pointsAwarded: points, 
+            hallOfFame: isFame // Automatically set true if > 8
+        }); 
+        
+    } catch (e) { 
+        console.error(e); 
+        alert("Error grading submission");
+    }
 };
 
 window.rejectSubmission = async (subId) => { if(confirm("Reject?")) await updateDoc(doc(db, 'artifacts', APP_COLLECTION_ID, 'public', 'data', 'submissions', subId), { status: 'rejected' }); };
