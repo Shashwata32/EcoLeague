@@ -697,7 +697,7 @@ async function processImage(file) {
     const options = {
         maxSizeMB: 0.8,          // Target file size (0.8MB is safe for Firestore)
         maxWidthOrHeight: 1200,  // Max dimension (good balance of quality/size)
-        useWebWorker: true,      // CRITICAL: Runs in background to prevent freezing
+        useWebWorker: false,      // CRITICAL: Runs in background to prevent freezing
         fileType: "image/jpeg"   // Force JPEG format
     };
 
