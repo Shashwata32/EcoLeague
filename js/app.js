@@ -613,26 +613,105 @@ window.zoomImage = (src) => {
 window.previewImage = (input) => {
     const file = input.files[0];
     if (file) {
-        if(file.size > 5000000) return alert("Image too large (Max 1MB)");
+        if(file.size > 1000000) return alert("Image too large (Max 1MB)");
         const reader = new FileReader();
         reader.onload = (e) => { document.getElementById('preview-img').src = e.target.result; document.getElementById('preview-container').classList.remove('hidden'); document.getElementById('upload-placeholder').classList.add('hidden'); };
         reader.readAsDataURL(file);
     }
 };
 
+// window.submitReport = async () => {
+//     const btn = document.getElementById('btn-submit');
+//     const areaId = document.getElementById('input-area').value;
+//     const desc = document.getElementById('input-desc').value;
+//     const fileInput = document.getElementById('file-input');
+//     if (!areaId || !desc) return alert("Missing fields");
+//     btn.innerHTML = `Uploading...`; btn.disabled = true;
+//     try {
+//         let imageData = null;
+//         if(fileInput.files[0]) imageData = await new Promise(r => { const fr = new FileReader(); fr.onload = e => r(e.target.result); fr.readAsDataURL(fileInput.files[0]); });
+//         await addDoc(collection(db, 'artifacts', APP_COLLECTION_ID, 'public', 'data', 'submissions'), { areaId, userId: state.currentUser.uid, description: desc, image: imageData, status: 'pending', hallOfFame: false, timestamp: serverTimestamp() });
+//         alert("Submitted!"); window.switchView('home');
+//     } catch (e) { alert("Error"); } finally { btn.innerHTML = `Submit`; btn.disabled = false; }
+// };
+
+// REPLACE your window.submitReport with this:
 window.submitReport = async () => {
     const btn = document.getElementById('btn-submit');
     const areaId = document.getElementById('input-area').value;
     const desc = document.getElementById('input-desc').value;
     const fileInput = document.getElementById('file-input');
+    
     if (!areaId || !desc) return alert("Missing fields");
-    btn.innerHTML = `Uploading...`; btn.disabled = true;
+    
+    // Check if file exists
+    if (!fileInput.files[0]) return alert("Please select a photo");
+
+    btn.innerHTML = `Processing...`; 
+    btn.disabled = true;
+
     try {
-        let imageData = null;
-        if(fileInput.files[0]) imageData = await new Promise(r => { const fr = new FileReader(); fr.onload = e => r(e.target.result); fr.readAsDataURL(fileInput.files[0]); });
-        await addDoc(collection(db, 'artifacts', APP_COLLECTION_ID, 'public', 'data', 'submissions'), { areaId, userId: state.currentUser.uid, description: desc, image: imageData, status: 'pending', hallOfFame: false, timestamp: serverTimestamp() });
-        alert("Submitted!"); window.switchView('home');
-    } catch (e) { alert("Error"); } finally { btn.innerHTML = `Submit`; btn.disabled = false; }
+        // 1. COMPRESS & CONVERT the image before uploading
+        // This converts HEIC/PNG to JPEG and ensures it fits in the DB (under 1MB)
+        const compressedImage = await compressImage(fileInput.files[0]);
+
+        // 2. Upload to Database
+        await addDoc(collection(db, 'artifacts', APP_COLLECTION_ID, 'public', 'data', 'submissions'), { 
+            areaId, 
+            userId: state.currentUser.uid, 
+            description: desc, 
+            image: compressedImage, // We send the compressed JPEG
+            status: 'pending', 
+            hallOfFame: false, 
+            timestamp: serverTimestamp() 
+        });
+
+        alert("Submitted!"); 
+        window.switchView('home');
+
+    } catch (e) { 
+        console.error(e);
+        alert("Error: Image might still be too large or connection failed."); 
+    } finally { 
+        btn.innerHTML = `Submit`; 
+        btn.disabled = false; 
+    }
 };
+
+// ADD THIS NEW FUNCTION (Helper to resize images)
+function compressImage(file) {
+    return new Promise((resolve, reject) => {
+        const maxWidth = 800; // Resize to max 800px width (good for mobile)
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+
+                // Calculate new dimensions (keep aspect ratio)
+                if (width > maxWidth) {
+                    height *= maxWidth / width;
+                    width = maxWidth;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // Convert to JPEG with 0.7 quality (70%)
+                // This drastically reduces size while keeping it looking good
+                resolve(canvas.toDataURL('image/jpeg', 0.7));
+            };
+            img.onerror = (err) => reject(err);
+        };
+        reader.onerror = (err) => reject(err);
+    });
+}
 
 init();
