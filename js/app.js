@@ -613,7 +613,7 @@ window.zoomImage = (src) => {
 window.previewImage = (input) => {
     const file = input.files[0];
     if (file) {
-        if(file.size > 1000000) return alert("Image too large (Max 1MB)");
+        if(file.size > 5000000) return alert("Image too large (Max 1MB)");
         const reader = new FileReader();
         reader.onload = (e) => { document.getElementById('preview-img').src = e.target.result; document.getElementById('preview-container').classList.remove('hidden'); document.getElementById('upload-placeholder').classList.add('hidden'); };
         reader.readAsDataURL(file);
