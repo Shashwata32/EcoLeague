@@ -483,18 +483,61 @@ window.deleteArea = async (id) => { if(confirm("Delete area?")) await deleteDoc(
 window.renameArea = async (id, old) => { const n = prompt("New name:", old); if(n && n!==old) await updateDoc(doc(db, 'artifacts', APP_COLLECTION_ID, 'public', 'data', 'areas', id), { name: n }); };
 window.removeFromWall = async (id) => { if(confirm("Remove from Wall?")) await updateDoc(doc(db, 'artifacts', APP_COLLECTION_ID, 'public', 'data', 'submissions', id), { hallOfFame: false }); };
 
+// window.announceWinners = async () => {
+//     if(!confirm("End month & RESET scores?")) return;
+//     if(state.areas.length === 0) return;
+//     const winner = state.areas[0]; // Top score since default list is sorted
+//     const month = new Date().toLocaleString('default', { month: 'long', year: 'numeric' });
+//     try {
+//         const batch = writeBatch(db);
+//         batch.set(doc(collection(db, 'artifacts', APP_COLLECTION_ID, 'public', 'data', 'history')), { winnerName: winner.name, finalScore: winner.score, monthName: month, monthTimestamp: serverTimestamp() });
+//         state.areas.forEach(a => batch.update(doc(db, 'artifacts', APP_COLLECTION_ID, 'public', 'data', 'areas', a.id), { score: 0, badge: 'Contender' }));
+//         await batch.commit();
+//         alert(`🏆 ${winner.name} Wins! Scores reset.`);
+//     } catch(e) { console.error(e); }
+// };
+
 window.announceWinners = async () => {
-    if(!confirm("End month & RESET scores?")) return;
+    // 1. Update confirmation message to be clear
+    if(!confirm("End month & RESET scores? This will clear all submissions and reset charts.")) return;
+    
     if(state.areas.length === 0) return;
-    const winner = state.areas[0]; // Top score since default list is sorted
+    
+    // Sort logic is handled in listeners, but we take index 0 just to be safe
+    const winner = state.areas[0]; 
     const month = new Date().toLocaleString('default', { month: 'long', year: 'numeric' });
+
     try {
         const batch = writeBatch(db);
-        batch.set(doc(collection(db, 'artifacts', APP_COLLECTION_ID, 'public', 'data', 'history')), { winnerName: winner.name, finalScore: winner.score, monthName: month, monthTimestamp: serverTimestamp() });
-        state.areas.forEach(a => batch.update(doc(db, 'artifacts', APP_COLLECTION_ID, 'public', 'data', 'areas', a.id), { score: 0, badge: 'Contender' }));
+
+        // 2. Archive the Winner
+        batch.set(doc(collection(db, 'artifacts', APP_COLLECTION_ID, 'public', 'data', 'history')), { 
+            winnerName: winner.name, 
+            finalScore: winner.score, 
+            monthName: month, 
+            monthTimestamp: serverTimestamp() 
+        });
+
+        // 3. Reset Area Scores (Fixes Bar Chart)
+        state.areas.forEach(a => {
+            batch.update(doc(db, 'artifacts', APP_COLLECTION_ID, 'public', 'data', 'areas', a.id), { 
+                score: 0, 
+                badge: 'Contender' 
+            });
+        });
+
+        // 4. DELETE ALL SUBMISSIONS (Fixes Pie Chart)
+        // We must delete these so the submission count goes back to 0
+        state.submissions.forEach(sub => {
+            batch.delete(doc(db, 'artifacts', APP_COLLECTION_ID, 'public', 'data', 'submissions', sub.id));
+        });
+
         await batch.commit();
-        alert(`🏆 ${winner.name} Wins! Scores reset.`);
-    } catch(e) { console.error(e); }
+        alert(`🏆 ${winner.name} Wins! Scores and Charts reset.`);
+    } catch(e) { 
+        console.error(e); 
+        alert("Error during reset. Check console.");
+    }
 };
 
 window.gradeSubmission = async (subId, areaId, points, fame = false) => {
