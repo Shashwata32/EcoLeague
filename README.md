@@ -52,8 +52,8 @@ EcoLeague is a real-time web application that transforms neighborhood cleaning i
 
 ### Frontend
 - HTML5  
-- Vanilla JavaScript (ES6 Modules)  
-- Tailwind CSS  
+- JavaScript  
+- CSS  
 
 ### Backend
 - **Firebase Firestore** (Real-time DB)  
