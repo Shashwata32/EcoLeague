@@ -428,33 +428,72 @@ function updateAdminDashboardData() {
             subList.innerHTML = `<div class="bg-gray-50 rounded-xl p-8 text-center"><p class="text-gray-400 text-sm">All caught up!</p></div>`;
         } else {
             subList.innerHTML = pendingDocs.map(sub => `
-                <div class="bg-white rounded-2xl shadow-sm p-4 border border-gray-200">
-                    <div class="flex justify-between items-center mb-2"><span class="bg-green-100 text-green-800 text-[10px] font-bold px-2 py-1 rounded uppercase">${state.areas.find(a => a.id === sub.areaId)?.name || 'Unknown'}</span></div>
-                    ${sub.image ? `<img src="${sub.image}" class="w-full h-40 object-cover rounded-xl mb-3 bg-gray-50 shadow-sm cursor-zoom-in" onclick="window.zoomImage('${sub.image}')" />` : ''}
-                    <p class="text-gray-800 text-sm font-medium mb-3">"${sub.description}"</p>
+            <div class="bg-white rounded-2xl shadow-sm p-4 border border-gray-200">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="bg-green-100 text-green-800 text-[10px] font-bold px-2 py-1 rounded uppercase">
+                        ${state.areas.find(a => a.id === sub.areaId)?.name || 'Unknown'}
+                    </span>
+                    ${sub.images && sub.images.length > 1 ? `<span class="text-[10px] text-gray-400 font-bold"><i class="fas fa-layer-group"></i> ${sub.images.length} Photos</span>` : ''}
+                </div>
+
+                ${
+                    sub.images && sub.images.length > 0 
+                    ? `<div class="flex gap-2 overflow-x-auto pb-2 mb-3 snap-x">
+                         ${sub.images.map(img => `<img src="${img}" onclick="window.zoomImage('${img}')" class="snap-start w-32 h-32 object-cover rounded-xl border border-gray-100 shrink-0 bg-gray-50 cursor-zoom-in">`).join('')}
+                       </div>`
+                    : sub.image 
+                        ? `<img src="${sub.image}" class="w-full h-40 object-cover rounded-xl mb-3 bg-gray-50 shadow-sm cursor-zoom-in" onclick="window.zoomImage('${sub.image}')" />` 
+                        : ''
+                }
+
+                <p class="text-gray-800 text-sm font-medium mb-3">"${sub.description}"</p>
+                
+                <div class="flex gap-2 items-center mt-3">
+                    <div class="relative w-16">
+                        <input type="number" id="score-${sub.id}" value="5" min="1" max="10" 
+                            class="w-full p-2 text-center font-bold text-gray-800 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-green-500">
+                    </div>
+                    
+                    <button onclick="window.gradeSubmission('${sub.id}', '${sub.areaId}')" 
+                        class="flex-1 bg-green-600 text-white py-2 rounded-lg text-xs font-bold hover:bg-green-700 transition shadow-sm">
+                        Approve
+                    </button>
+                    
+                    <button onclick="window.rejectSubmission('${sub.id}')" 
+                        class="px-3 py-2 text-red-400 hover:bg-red-50 rounded-lg border border-transparent hover:border-red-100 transition">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        `).join('');
+//             subList.innerHTML = pendingDocs.map(sub => `
+//                 <div class="bg-white rounded-2xl shadow-sm p-4 border border-gray-200">
+//                     <div class="flex justify-between items-center mb-2"><span class="bg-green-100 text-green-800 text-[10px] font-bold px-2 py-1 rounded uppercase">${state.areas.find(a => a.id === sub.areaId)?.name || 'Unknown'}</span></div>
+//                     ${sub.image ? `<img src="${sub.image}" class="w-full h-40 object-cover rounded-xl mb-3 bg-gray-50 shadow-sm cursor-zoom-in" onclick="window.zoomImage('${sub.image}')" />` : ''}
+//                     <p class="text-gray-800 text-sm font-medium mb-3">"${sub.description}"</p>
                     
 
 
-                    <div class="flex gap-2 items-center mt-3">
-    <div class="relative w-16">
-        <input type="number" id="score-${sub.id}" value="5" min="1" max="10" 
-            class="w-full p-2 text-center font-bold text-gray-800 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-green-500">
-    </div>
+//                     <div class="flex gap-2 items-center mt-3">
+//     <div class="relative w-16">
+//         <input type="number" id="score-${sub.id}" value="5" min="1" max="10" 
+//             class="w-full p-2 text-center font-bold text-gray-800 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-green-500">
+//     </div>
     
-    <button onclick="window.gradeSubmission('${sub.id}', '${sub.areaId}')" 
-        class="flex-1 bg-green-600 text-white py-2 rounded-lg text-xs font-bold hover:bg-green-700 transition shadow-sm">
-        Approve
-    </button>
+//     <button onclick="window.gradeSubmission('${sub.id}', '${sub.areaId}')" 
+//         class="flex-1 bg-green-600 text-white py-2 rounded-lg text-xs font-bold hover:bg-green-700 transition shadow-sm">
+//         Approve
+//     </button>
     
-    <button onclick="window.rejectSubmission('${sub.id}')" 
-        class="px-3 py-2 text-red-400 hover:bg-red-50 rounded-lg border border-transparent hover:border-red-100 transition">
-        <i class="fas fa-times"></i>
-    </button>
-</div>
+//     <button onclick="window.rejectSubmission('${sub.id}')" 
+//         class="px-3 py-2 text-red-400 hover:bg-red-50 rounded-lg border border-transparent hover:border-red-100 transition">
+//         <i class="fas fa-times"></i>
+//     </button>
+// </div>
 
 
-                </div>
-            `).join('');
+//                 </div>
+//             `).join('');
         }
     }
     updateCharts();
@@ -693,46 +732,47 @@ window.previewImage = (input) => {
 //     const fileInput = document.getElementById('file-input');
     
 //     if (!areaId || !desc) return alert("Please fill in all fields.");
-//     if (!fileInput.files[0]) return alert("Please select a photo.");
+    
+//     // Check for files length instead of just files[0]
+//     if (fileInput.files.length === 0) return alert("Please select at least one photo.");
+
+//     const totalFiles = fileInput.files.length;
 
 //     // Visual Feedback
-//     btn.innerHTML = `<i class="fas fa-cog fa-spin"></i> Optimizing...`; 
+//     btn.innerHTML = `<i class="fas fa-cog fa-spin"></i> Processing ${totalFiles} photos...`; 
 //     btn.disabled = true;
 
 //     try {
-//         // 1. SMART PROCESSING (Uses the library to avoid freezing)
-//         const finalImageBase64 = await processImage(fileInput.files[0]);
+//         // Loop through all files and map them to upload promises
+//         const uploadPromises = Array.from(fileInput.files).map(async (file, index) => {
+//             // Update button text to show progress
+//             btn.innerHTML = `<i class="fas fa-cog fa-spin"></i> Processing ${index + 1}/${totalFiles}...`;
+            
+//             // 1. Process Image
+//             const finalImageBase64 = await processImage(file);
 
-//         btn.innerHTML = `<i class="fas fa-cloud-upload-alt"></i> Uploading...`;
-
-//         // 2. Upload to Firestore
-//         await addDoc(collection(db, 'artifacts', APP_COLLECTION_ID, 'public', 'data', 'submissions'), { 
-//             areaId, 
-//             userId: state.currentUser?.uid || 'anonymous', 
-//             description: desc, 
-//             image: finalImageBase64, 
-//             status: 'pending', 
-//             hallOfFame: false, 
-//             timestamp: serverTimestamp() 
+//             // 2. Upload to Firestore (Create a separate document for each image)
+//             return addDoc(collection(db, 'artifacts', APP_COLLECTION_ID, 'public', 'data', 'submissions'), { 
+//                 areaId, 
+//                 userId: state.currentUser?.uid || 'anonymous', 
+//                 description: desc, // Same description for all
+//                 image: finalImageBase64, 
+//                 status: 'pending', 
+//                 hallOfFame: false, 
+//                 timestamp: serverTimestamp() 
+//             });
 //         });
 
-//         alert("Submitted Successfully!"); 
-//         window.switchView('home');
+//         // Wait for ALL uploads to finish
+//         await Promise.all(uploadPromises);
 
-//         // Clear form
-//         // document.getElementById('input-desc').value = '';
-//         // document.getElementById('file-input').value = '';
-//         // document.getElementById('preview-container').classList.add('hidden');
-//         // document.getElementById('upload-placeholder').classList.remove('hidden');
+//         alert("All photos submitted successfully!"); 
+//         window.switchView('home');
 
 //     } catch (e) { 
 //         console.error("Error:", e);
-//         // If it fails, give a clear reason
 //         alert("Upload failed. " + e.message); 
 //     } finally { 
-//         // btn.innerHTML = `Submit <i class="fas fa-paper-plane"></i>`; 
-//         // btn.disabled = false; 
-
 //         if(document.getElementById('btn-submit')) {
 //             btn.innerHTML = `Submit <i class="fas fa-paper-plane"></i>`; 
 //             btn.disabled = false; 
@@ -747,41 +787,40 @@ window.submitReport = async () => {
     const fileInput = document.getElementById('file-input');
     
     if (!areaId || !desc) return alert("Please fill in all fields.");
-    
-    // Check for files length instead of just files[0]
     if (fileInput.files.length === 0) return alert("Please select at least one photo.");
 
     const totalFiles = fileInput.files.length;
-
+    
     // Visual Feedback
     btn.innerHTML = `<i class="fas fa-cog fa-spin"></i> Processing ${totalFiles} photos...`; 
     btn.disabled = true;
 
     try {
-        // Loop through all files and map them to upload promises
-        const uploadPromises = Array.from(fileInput.files).map(async (file, index) => {
-            // Update button text to show progress
-            btn.innerHTML = `<i class="fas fa-cog fa-spin"></i> Processing ${index + 1}/${totalFiles}...`;
-            
-            // 1. Process Image
-            const finalImageBase64 = await processImage(file);
+        // 1. Process ALL images in parallel
+        // We wait for all compressions to finish before uploading
+        const processedImages = await Promise.all(
+            Array.from(fileInput.files).map(file => processImage(file))
+        );
 
-            // 2. Upload to Firestore (Create a separate document for each image)
-            return addDoc(collection(db, 'artifacts', APP_COLLECTION_ID, 'public', 'data', 'submissions'), { 
-                areaId, 
-                userId: state.currentUser?.uid || 'anonymous', 
-                description: desc, // Same description for all
-                image: finalImageBase64, 
-                status: 'pending', 
-                hallOfFame: false, 
-                timestamp: serverTimestamp() 
-            });
+        btn.innerHTML = `<i class="fas fa-cloud-upload-alt"></i> Uploading...`;
+
+        // 2. Upload to Firestore as a SINGLE document
+        await addDoc(collection(db, 'artifacts', APP_COLLECTION_ID, 'public', 'data', 'submissions'), { 
+            areaId, 
+            userId: state.currentUser?.uid || 'anonymous', 
+            description: desc, 
+            
+            // KEY CHANGE: We store the first image as 'image' (for backward compatibility with Leaderboard)
+            // AND we store the full list as 'images' (for the Admin Panel)
+            image: processedImages[0], 
+            images: processedImages,   
+            
+            status: 'pending', 
+            hallOfFame: false, 
+            timestamp: serverTimestamp() 
         });
 
-        // Wait for ALL uploads to finish
-        await Promise.all(uploadPromises);
-
-        alert("All photos submitted successfully!"); 
+        alert("Report submitted successfully!"); 
         window.switchView('home');
 
     } catch (e) { 
