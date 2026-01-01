@@ -836,13 +836,14 @@ window.submitReport = async () => {
 
 // --- HELPER: Professional Image Processor ---
 
-// --- HELPER: Professional Image Processor ---
 async function processImage(file) {
     console.log("Starting processing...", file.type, file.size);
 
     // A. Handle iPhone HEIC files
     if (file.type === "image/heic" || file.name.toLowerCase().endsWith('.heic')) {
         try {
+            console.log("HEIC detected. Converting...");
+            // Only runs if heic2any is loaded
             if (typeof heic2any !== 'undefined') {
                 const convertedBlob = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.8 });
                 file = convertedBlob; 
@@ -854,80 +855,23 @@ async function processImage(file) {
 
     // B. Setup Compression Options
     const options = {
-        maxSizeMB: 0.8,          // Lowered slightly to be safe for Firestore
-        maxWidthOrHeight: 1200,
-        useWebWorker: false,
-        fileType: "image/jpeg"
+        maxSizeMB: 0.8,          // Target file size (0.8MB is safe for Firestore)
+        maxWidthOrHeight: 1200,  // Max dimension (good balance of quality/size)
+        useWebWorker: false,      // CRITICAL: Runs in background to prevent freezing
+        fileType: "image/jpeg"   // Force JPEG format
     };
 
     try {
-        // C. Attempt Compression
+        // C. Run Compression
         const compressedFile = await imageCompression(file, options);
         console.log(`Compressed: ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`);
-        
-        // Double check compressed size (Base64 adds ~33% overhead)
-        if (compressedFile.size > 900000) { // ~750KB
-            throw new Error("Even after compression, image is too large for Firestore.");
-        }
 
+        // D. Convert to Base64 for Database
         return await imageCompression.getDataUrlFromFile(compressedFile);
-        
     } catch (error) {
-        // D. FALLBACK: If compression fails (e.g., WhatsApp image), check original size
-        console.warn("Compression failed, checking original file...", error);
-
-        // SAFETY CHECK: Is the original file small enough?
-        // 750KB is the safe limit because Base64 encoding makes files 33% larger.
-        // 750KB * 1.33 = ~1MB (Firestore Limit)
-        if (file.size > 900000) { 
-            throw new Error("Image compression failed and original is too large (>750KB). Please try a different photo.");
-        }
-        
-        // If safe, return original
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = (e) => resolve(e.target.result);
-            reader.onerror = (e) => reject(e);
-            reader.readAsDataURL(file);
-        });
+        console.error("Compression failed:", error);
+        throw new Error("Could not compress image. Try a smaller one.");
     }
 }
-// async function processImage(file) {
-//     console.log("Starting processing...", file.type, file.size);
-
-//     // A. Handle iPhone HEIC files
-//     if (file.type === "image/heic" || file.name.toLowerCase().endsWith('.heic')) {
-//         try {
-//             console.log("HEIC detected. Converting...");
-//             // Only runs if heic2any is loaded
-//             if (typeof heic2any !== 'undefined') {
-//                 const convertedBlob = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.8 });
-//                 file = convertedBlob; 
-//             }
-//         } catch (e) {
-//             console.warn("HEIC conversion skipped:", e);
-//         }
-//     }
-
-//     // B. Setup Compression Options
-//     const options = {
-//         maxSizeMB: 0.8,          // Target file size (0.8MB is safe for Firestore)
-//         maxWidthOrHeight: 1200,  // Max dimension (good balance of quality/size)
-//         useWebWorker: false,      // CRITICAL: Runs in background to prevent freezing
-//         fileType: "image/jpeg"   // Force JPEG format
-//     };
-
-//     try {
-//         // C. Run Compression
-//         const compressedFile = await imageCompression(file, options);
-//         console.log(`Compressed: ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`);
-
-//         // D. Convert to Base64 for Database
-//         return await imageCompression.getDataUrlFromFile(compressedFile);
-//     } catch (error) {
-//         console.error("Compression failed:", error);
-//         throw new Error("Could not compress image. Try a smaller one.");
-//     }
-// }
 
 init();
