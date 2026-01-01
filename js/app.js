@@ -281,19 +281,54 @@ function renderHome() {
     elements.contentArea.innerHTML = html;
 }
 
+// function renderUpload() {
+//     const options = state.areas.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
+//     elements.contentArea.innerHTML = `
+//         <div class="animate-fade-in p-5 pb-24">
+//             <h2 class="text-2xl font-bold font-fredoka text-gray-800 mb-6">New Report</h2>
+//             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-6">
+//                 <div><label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">Select Area</label><div class="relative"><select id="input-area" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl appearance-none font-medium text-gray-700 outline-none">${options}</select><i class="fas fa-chevron-down absolute right-4 top-4 text-gray-400 pointer-events-none"></i></div></div>
+//                 <div>
+//                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">Evidence</label>
+//                     <div id="drop-zone" onclick="document.getElementById('file-input').click()" class="border-2 border-dashed border-gray-300 rounded-2xl h-48 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 hover:border-green-400 transition-all group overflow-hidden relative">
+//                         <input type="file" id="file-input" accept="image/*" class="hidden" onchange="window.previewImage(this)">
+//                         <div id="upload-placeholder" class="text-center p-4"><div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-green-100 transition-colors"><i class="fas fa-camera text-xl text-gray-400 group-hover:text-green-600"></i></div><p class="text-sm font-bold text-gray-600">Tap to upload photo</p></div>
+//                         <div id="preview-container" class="hidden w-full h-full relative"><img id="preview-img" class="w-full h-full object-cover"><div class="absolute inset-0 bg-black/40 flex items-center justify-center"><span class="text-white text-xs font-bold border border-white px-3 py-1 rounded-full backdrop-blur-md">Change</span></div></div>
+//                     </div>
+//                 </div>
+//                 <div><label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">Description</label><textarea id="input-desc" rows="3" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl font-medium text-gray-700 outline-none" placeholder="We cleaned the park..."></textarea></div>
+//                 <button onclick="window.submitReport()" id="btn-submit" class="w-full bg-green-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-green-700 transition flex items-center justify-center gap-2"><span>Submit</span><i class="fas fa-paper-plane"></i></button>
+//             </div>
+//         </div>
+//     `;
+// }
+
 function renderUpload() {
     const options = state.areas.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
     elements.contentArea.innerHTML = `
         <div class="animate-fade-in p-5 pb-24">
             <h2 class="text-2xl font-bold font-fredoka text-gray-800 mb-6">New Report</h2>
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-6">
-                <div><label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">Select Area</label><div class="relative"><select id="input-area" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl appearance-none font-medium text-gray-700 outline-none">${options}</select><i class="fas fa-chevron-down absolute right-4 top-4 text-gray-400 pointer-events-none"></i></div></div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">Select Area</label>
+                    <div class="relative">
+                        <select id="input-area" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl appearance-none font-medium text-gray-700 outline-none">${options}</select>
+                        <i class="fas fa-chevron-down absolute right-4 top-4 text-gray-400 pointer-events-none"></i>
+                    </div>
+                </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">Evidence</label>
                     <div id="drop-zone" onclick="document.getElementById('file-input').click()" class="border-2 border-dashed border-gray-300 rounded-2xl h-48 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 hover:border-green-400 transition-all group overflow-hidden relative">
-                        <input type="file" id="file-input" accept="image/*" class="hidden" onchange="window.previewImage(this)">
-                        <div id="upload-placeholder" class="text-center p-4"><div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-green-100 transition-colors"><i class="fas fa-camera text-xl text-gray-400 group-hover:text-green-600"></i></div><p class="text-sm font-bold text-gray-600">Tap to upload photo</p></div>
-                        <div id="preview-container" class="hidden w-full h-full relative"><img id="preview-img" class="w-full h-full object-cover"><div class="absolute inset-0 bg-black/40 flex items-center justify-center"><span class="text-white text-xs font-bold border border-white px-3 py-1 rounded-full backdrop-blur-md">Change</span></div></div>
+                        <input type="file" id="file-input" accept="image/*" multiple class="hidden" onchange="window.previewImage(this)">
+                        
+                        <div id="upload-placeholder" class="text-center p-4">
+                            <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-green-100 transition-colors">
+                                <i class="fas fa-camera text-xl text-gray-400 group-hover:text-green-600"></i>
+                            </div>
+                            <p class="text-sm font-bold text-gray-600">Tap to upload photos</p>
+                        </div>
+
+                        <div id="preview-container" class="hidden w-full h-full p-2 flex gap-2 overflow-x-auto items-center bg-gray-50"></div>
                     </div>
                 </div>
                 <div><label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">Description</label><textarea id="input-desc" rows="3" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl font-medium text-gray-700 outline-none" placeholder="We cleaned the park..."></textarea></div>
@@ -610,16 +645,100 @@ window.zoomImage = (src) => {
     document.getElementById('img-lightbox').classList.remove('hidden');
 };
 
+// window.previewImage = (input) => {
+//     const file = input.files[0];
+//     if (file) {
+//         if(file.size > 20000000) return alert("Image too large (Max 1MB)");
+//         const reader = new FileReader();
+//         reader.onload = (e) => { document.getElementById('preview-img').src = e.target.result; document.getElementById('preview-container').classList.remove('hidden'); document.getElementById('upload-placeholder').classList.add('hidden'); };
+//         reader.readAsDataURL(file);
+//     }
+// };
+
 window.previewImage = (input) => {
-    const file = input.files[0];
-    if (file) {
-        if(file.size > 20000000) return alert("Image too large (Max 1MB)");
-        const reader = new FileReader();
-        reader.onload = (e) => { document.getElementById('preview-img').src = e.target.result; document.getElementById('preview-container').classList.remove('hidden'); document.getElementById('upload-placeholder').classList.add('hidden'); };
-        reader.readAsDataURL(file);
+    const container = document.getElementById('preview-container');
+    const placeholder = document.getElementById('upload-placeholder');
+    
+    // Clear previous previews if user selects new files
+    container.innerHTML = ''; 
+
+    if (input.files && input.files.length > 0) {
+        placeholder.classList.add('hidden');
+        container.classList.remove('hidden');
+
+        // Loop through all selected files
+        Array.from(input.files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                // Create an image element for each file
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.className = "h-full w-auto object-cover rounded-lg shadow-sm border border-gray-200 shrink-0";
+                container.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+        });
+    } else {
+        // Reset if cancelled
+        placeholder.classList.remove('hidden');
+        container.classList.add('hidden');
     }
 };
 // --- UPLOAD LOGIC ---
+
+// window.submitReport = async () => {
+//     const btn = document.getElementById('btn-submit');
+//     const areaId = document.getElementById('input-area').value;
+//     const desc = document.getElementById('input-desc').value;
+//     const fileInput = document.getElementById('file-input');
+    
+//     if (!areaId || !desc) return alert("Please fill in all fields.");
+//     if (!fileInput.files[0]) return alert("Please select a photo.");
+
+//     // Visual Feedback
+//     btn.innerHTML = `<i class="fas fa-cog fa-spin"></i> Optimizing...`; 
+//     btn.disabled = true;
+
+//     try {
+//         // 1. SMART PROCESSING (Uses the library to avoid freezing)
+//         const finalImageBase64 = await processImage(fileInput.files[0]);
+
+//         btn.innerHTML = `<i class="fas fa-cloud-upload-alt"></i> Uploading...`;
+
+//         // 2. Upload to Firestore
+//         await addDoc(collection(db, 'artifacts', APP_COLLECTION_ID, 'public', 'data', 'submissions'), { 
+//             areaId, 
+//             userId: state.currentUser?.uid || 'anonymous', 
+//             description: desc, 
+//             image: finalImageBase64, 
+//             status: 'pending', 
+//             hallOfFame: false, 
+//             timestamp: serverTimestamp() 
+//         });
+
+//         alert("Submitted Successfully!"); 
+//         window.switchView('home');
+
+//         // Clear form
+//         // document.getElementById('input-desc').value = '';
+//         // document.getElementById('file-input').value = '';
+//         // document.getElementById('preview-container').classList.add('hidden');
+//         // document.getElementById('upload-placeholder').classList.remove('hidden');
+
+//     } catch (e) { 
+//         console.error("Error:", e);
+//         // If it fails, give a clear reason
+//         alert("Upload failed. " + e.message); 
+//     } finally { 
+//         // btn.innerHTML = `Submit <i class="fas fa-paper-plane"></i>`; 
+//         // btn.disabled = false; 
+
+//         if(document.getElementById('btn-submit')) {
+//             btn.innerHTML = `Submit <i class="fas fa-paper-plane"></i>`; 
+//             btn.disabled = false; 
+//         }
+//     }
+// };
 
 window.submitReport = async () => {
     const btn = document.getElementById('btn-submit');
@@ -628,46 +747,47 @@ window.submitReport = async () => {
     const fileInput = document.getElementById('file-input');
     
     if (!areaId || !desc) return alert("Please fill in all fields.");
-    if (!fileInput.files[0]) return alert("Please select a photo.");
+    
+    // Check for files length instead of just files[0]
+    if (fileInput.files.length === 0) return alert("Please select at least one photo.");
+
+    const totalFiles = fileInput.files.length;
 
     // Visual Feedback
-    btn.innerHTML = `<i class="fas fa-cog fa-spin"></i> Optimizing...`; 
+    btn.innerHTML = `<i class="fas fa-cog fa-spin"></i> Processing ${totalFiles} photos...`; 
     btn.disabled = true;
 
     try {
-        // 1. SMART PROCESSING (Uses the library to avoid freezing)
-        const finalImageBase64 = await processImage(fileInput.files[0]);
+        // Loop through all files and map them to upload promises
+        const uploadPromises = Array.from(fileInput.files).map(async (file, index) => {
+            // Update button text to show progress
+            btn.innerHTML = `<i class="fas fa-cog fa-spin"></i> Processing ${index + 1}/${totalFiles}...`;
+            
+            // 1. Process Image
+            const finalImageBase64 = await processImage(file);
 
-        btn.innerHTML = `<i class="fas fa-cloud-upload-alt"></i> Uploading...`;
-
-        // 2. Upload to Firestore
-        await addDoc(collection(db, 'artifacts', APP_COLLECTION_ID, 'public', 'data', 'submissions'), { 
-            areaId, 
-            userId: state.currentUser?.uid || 'anonymous', 
-            description: desc, 
-            image: finalImageBase64, 
-            status: 'pending', 
-            hallOfFame: false, 
-            timestamp: serverTimestamp() 
+            // 2. Upload to Firestore (Create a separate document for each image)
+            return addDoc(collection(db, 'artifacts', APP_COLLECTION_ID, 'public', 'data', 'submissions'), { 
+                areaId, 
+                userId: state.currentUser?.uid || 'anonymous', 
+                description: desc, // Same description for all
+                image: finalImageBase64, 
+                status: 'pending', 
+                hallOfFame: false, 
+                timestamp: serverTimestamp() 
+            });
         });
 
-        alert("Submitted Successfully!"); 
-        window.switchView('home');
+        // Wait for ALL uploads to finish
+        await Promise.all(uploadPromises);
 
-        // Clear form
-        // document.getElementById('input-desc').value = '';
-        // document.getElementById('file-input').value = '';
-        // document.getElementById('preview-container').classList.add('hidden');
-        // document.getElementById('upload-placeholder').classList.remove('hidden');
+        alert("All photos submitted successfully!"); 
+        window.switchView('home');
 
     } catch (e) { 
         console.error("Error:", e);
-        // If it fails, give a clear reason
         alert("Upload failed. " + e.message); 
     } finally { 
-        // btn.innerHTML = `Submit <i class="fas fa-paper-plane"></i>`; 
-        // btn.disabled = false; 
-
         if(document.getElementById('btn-submit')) {
             btn.innerHTML = `Submit <i class="fas fa-paper-plane"></i>`; 
             btn.disabled = false; 
